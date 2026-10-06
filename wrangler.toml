@@ -5,3 +5,7 @@ compatibility_date = "2026-10-01"
 # workers.dev のURLだけを使う。API_TOKEN はここに書かず、wrangler secret put で設定する
 workers_dev = true
 preview_urls = false
+
+# 毎日20時（日本時間）に翌日のごみを LINE に通知する。cron は UTC で書く
+[triggers]
+crons = ["0 11 * * *"]

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import worker from "../src/worker.ts";
+import worker, { notifyTomorrow } from "../src/worker.ts";
 
 const TOKEN = "test-token";
 const URL = "https://example.workers.dev/collections?address=阿佐谷北1丁目&date=2026-10-07";
@@ -43,5 +43,47 @@ describe("worker", () => {
       { API_TOKEN: TOKEN },
     );
     assert.equal(res.status, 404);
+  });
+});
+
+describe("翌日の LINE 通知", () => {
+  const ENV = { LINE_CHANNEL_ACCESS_TOKEN: "line-token", LINE_USER_ID: "U123", NOTIFY_ADDRESS: "杉並区阿佐谷北1丁目" };
+
+  // fetch の偽物。送ったリクエストを記録する
+  function fakeFetch(status = 200) {
+    const sent: { url: string; init: RequestInit }[] = [];
+    const fetchFn = (async (url: string, init: RequestInit) => {
+      sent.push({ url, init });
+      return new Response("{}", { status });
+    }) as typeof fetch;
+    return { fetchFn, sent };
+  }
+
+  it("20時（日本時間）に、翌日の種別を送る", async () => {
+    const { fetchFn, sent } = fakeFetch();
+    await notifyTomorrow(ENV, new Date("2026-10-06T11:00:00Z"), fetchFn);
+    assert.equal(sent.length, 1);
+    assert.equal(sent[0].url, "https://api.line.me/v2/bot/message/push");
+    assert.equal((sent[0].init.headers as Record<string, string>).authorization, "Bearer line-token");
+    assert.deepEqual(JSON.parse(sent[0].init.body as string), {
+      to: "U123",
+      messages: [{ type: "text", text: "明日 10/7（水）は可燃ごみの日です" }],
+    });
+  });
+
+  it("翌日に収集がなければ送らない", async () => {
+    const { fetchFn, sent } = fakeFetch();
+    await notifyTomorrow(ENV, new Date("2026-10-05T11:00:00Z"), fetchFn);
+    assert.equal(sent.length, 0);
+  });
+
+  it("設定が足りなければ例外にする", async () => {
+    const { fetchFn } = fakeFetch();
+    await assert.rejects(notifyTomorrow({ ...ENV, LINE_USER_ID: undefined }, new Date(), fetchFn), /LINE_USER_ID/);
+  });
+
+  it("LINE がエラーを返したら例外にする", async () => {
+    const { fetchFn } = fakeFetch(401);
+    await assert.rejects(notifyTomorrow(ENV, new Date("2026-10-06T11:00:00Z"), fetchFn), /401/);
   });
 });
