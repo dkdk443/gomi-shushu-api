@@ -129,6 +129,14 @@ npx wrangler secret put LINE_USER_ID     # U で始まる文字列
 npx wrangler secret put NOTIFY_ADDRESS   # 例: 杉並区阿佐谷北1丁目（丁目まで）
 ```
 
+20時を待たずに試すときは、`POST /notify` でテスト送信します。文面はCronと同じで、先頭に【テスト送信】が付きます。`date` を省略すると翌日分で、収集がない日は送らずに `"sent": false` を返すので、収集がある日を `date` に指定してください。
+
+```sh
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  "https://gomi-shushu-api.<アカウント>.workers.dev/notify?date=2026-10-07"
+# 住所が阿佐谷北1丁目なら {"date":"2026-10-07","sent":true,"text":"【テスト送信】明日 10/7（水）は可燃ごみの日です"}
+```
+
 手元で試すときは、`.dev.vars` に同じ3つを書いて `npx wrangler dev --test-scheduled` を実行し、`curl "http://localhost:8787/__scheduled?cron=0+11+*+*+*"` で呼び出します。実際にLINEへ送られます。
 
 Workersではファイルを読めないので、データは `src/data/bundled-sources.ts` でビルド時に組み込みます。`data/` にJSONを足したら、ここにも足してください（足し忘れはテストで落ちます）。

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import worker, { notifyTomorrow } from "../src/worker.ts";
+import worker, { handleNotify, notifyTomorrow } from "../src/worker.ts";
 
 const TOKEN = "test-token";
 const URL = "https://example.workers.dev/collections?address=阿佐谷北1丁目&date=2026-10-07";
@@ -85,5 +85,59 @@ describe("翌日の LINE 通知", () => {
   it("LINE がエラーを返したら例外にする", async () => {
     const { fetchFn } = fakeFetch(401);
     await assert.rejects(notifyTomorrow(ENV, new Date("2026-10-06T11:00:00Z"), fetchFn), /401/);
+  });
+});
+
+describe("POST /notify（テスト送信）", () => {
+  const ENV = {
+    API_TOKEN: TOKEN,
+    LINE_CHANNEL_ACCESS_TOKEN: "line-token",
+    LINE_USER_ID: "U123",
+    NOTIFY_ADDRESS: "杉並区阿佐谷北1丁目",
+  };
+  const NOW = new Date("2026-10-06T03:00:00Z");
+
+  function fakeFetch(status = 200) {
+    const texts: string[] = [];
+    const fetchFn = (async (_url: string, init: RequestInit) => {
+      texts.push(JSON.parse(init.body as string).messages[0].text);
+      return new Response("{}", { status });
+    }) as typeof fetch;
+    return { fetchFn, texts };
+  }
+
+  // このファイルでは URL が定数名に使われているので、globalThis から取る
+  const url = (query = "") => new globalThis.URL(`https://example.workers.dev/notify${query}`);
+
+  it("date を省略すると翌日分を、目印を付けて送る", async () => {
+    const { fetchFn, texts } = fakeFetch();
+    const res = await handleNotify(ENV, url(), NOW, fetchFn);
+    const text = "【テスト送信】明日 10/7（水）は可燃ごみの日です";
+    assert.deepEqual(res, { status: 200, body: { date: "2026-10-07", sent: true, text } });
+    assert.deepEqual(texts, [text]);
+  });
+
+  it("収集がない日は送らず、sent: false を返す", async () => {
+    const { fetchFn, texts } = fakeFetch();
+    const res = await handleNotify(ENV, url("?date=2026-10-06"), NOW, fetchFn);
+    assert.deepEqual(res, { status: 200, body: { date: "2026-10-06", sent: false } });
+    assert.equal(texts.length, 0);
+  });
+
+  it("date の形式が違えば 400", async () => {
+    const res = await handleNotify(ENV, url("?date=2026-13-01"), NOW, fakeFetch().fetchFn);
+    assert.equal(res.status, 400);
+  });
+
+  it("設定が足りなければ 503、LINE がエラーなら 502", async () => {
+    assert.equal((await handleNotify({ API_TOKEN: TOKEN }, url(), NOW, fakeFetch().fetchFn)).status, 503);
+    assert.equal((await handleNotify(ENV, url(), NOW, fakeFetch(401).fetchFn)).status, 502);
+  });
+
+  it("トークンがなければ 401、GET なら 405", async () => {
+    const unauth = await worker.fetch(new Request(url(), { method: "POST" }), ENV);
+    assert.equal(unauth.status, 401);
+    const get = await worker.fetch(new Request(url(), { headers: { authorization: `Bearer ${TOKEN}` } }), ENV);
+    assert.equal(get.status, 405);
   });
 });
