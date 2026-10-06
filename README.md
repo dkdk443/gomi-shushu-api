@@ -91,6 +91,12 @@ npm test
 npm run typecheck
 ```
 
+Dockerで動かす場合は次のとおりです。中身は `npm start` と同じNode版で認証がないので、ポートは `127.0.0.1` だけに開けます。
+
+```sh
+docker compose up --build
+```
+
 ## デプロイ（Cloudflare Workers・自分専用）
 
 Cloudflare Workersの無料プラン（1日10万リクエスト）で動かします。超えても請求ではなくエラーになります。

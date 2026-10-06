@@ -1,0 +1,7 @@
+# ローカル開発・確認用（Node 版には認証がないので、127.0.0.1 だけに開ける）
+services:
+  api:
+    build: .
+    image: gomi-shushu-api
+    ports:
+      - "127.0.0.1:3000:3000"
