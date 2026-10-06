@@ -4,6 +4,8 @@
 
 API仕様は [`openapi.yaml`](openapi.yaml)（OpenAPI 3.1）にまとめています。`npx @redocly/cli build-docs openapi.yaml` でHTMLに書き出すと、ブラウザで読めます。
 
+## 使い方
+
 ```
 GET /collections?address=東京都杉並区阿佐谷北1丁目&date=2026-10-07
 
@@ -18,6 +20,7 @@ GET /collections?address=東京都杉並区阿佐谷北1丁目&date=2026-10-07
 - `date` を省略すると今日（日本時間）になります
 - `types` は `可燃ごみ` / `不燃ごみ` / `びん・かん・プラ` / `古紙・ペットボトル` のうち、その日に収集があるもの。収集がなければ `[]`
 - 住所は「東京都」「杉並区」を省略してもかまいません。全角数字、漢数字の丁目（`一丁目`）、`1-2-3` 形式、`阿佐ヶ谷`・`堀の内` などの表記ゆれも受け付けます
+
 ### 期間を指定してまとめて引く
 
 ```
@@ -39,7 +42,7 @@ GET /calendar?address=東京都杉並区天沼3丁目&from=2026-10-05&to=2026-10
 
 - `from` / `to` は両端を含みます。`from` を省略すると今日、`to` を省略すると `from` から7日分です
 - 期間は366日まで。期間の一部でも対応年度の外にかかると `date_out_of_range` になります
-- 住所・郵便番号の指定は `/collections` と同じです。丁目が決まらないときは、`days[].types` は候補で答えが分かれる日だけ `null` になり、`candidates` に丁目のまとまりごとのカレンダー（`{ chome, days }`）が入ります
+- 住所・郵便番号の指定は `/collections` と同じです。丁目が決まらないときは、候補で答えが分かれる日だけ `days[].types` が `null` になり、`candidates` に丁目のまとまりごとのカレンダー（`{ chome, days }`）が入ります
 - 期間が年度をまたぐと、`sources` に使った年度データが並びます
 
 ### 郵便番号で引く
@@ -79,7 +82,7 @@ GET /collections?zipcode=168-0063&date=2026-10-02
 
 ## 動かす
 
-Node.js 22.18 以上（`.ts` をそのまま実行します。実行時の依存はありません）。
+Node.js 22.18以上（`.ts` をそのまま実行します。実行時の依存はありません）。
 
 ```sh
 npm install        # 型チェック用の typescript だけ
@@ -90,7 +93,7 @@ npm run typecheck
 
 ## デプロイ（Cloudflare Workers・自分専用）
 
-Cloudflare Workers の無料プラン（1日10万リクエスト）で動かします。超えても請求ではなくエラーになります。
+Cloudflare Workersの無料プラン（1日10万リクエスト）で動かします。超えても請求ではなくエラーになります。
 
 `Authorization: Bearer <トークン>` が合わないリクエストは401で断ります。`API_TOKEN` が未設定のときは、設定漏れで公開状態にならないよう全部拒否（503）します。
 
@@ -106,13 +109,13 @@ curl -H "Authorization: Bearer $TOKEN" \
   "https://gomi-shushu-api.<アカウント>.workers.dev/collections?zipcode=167-0032"
 ```
 
-手元で Workers の環境のまま試すときは、`.dev.vars` に `API_TOKEN=…` を書いて `npm run dev:worker` を実行します（`.dev.vars` は git に入れない）。`npm start` の Node 版はローカル開発用で、認証はしません。
+手元でWorkersの環境のまま試すときは、`.dev.vars` に `API_TOKEN=…` を書いて `npm run dev:worker` を実行します（`.dev.vars` はgitに入れない）。`npm start` のNode版はローカル開発用で、認証はしません。
 
-Workers ではファイルを読めないので、データは `src/data/bundled-sources.ts` でビルド時に組み込みます。`data/` にJSONを足したら、ここにも足してください（足し忘れはテストで落ちます）。
+Workersではファイルを読めないので、データは `src/data/bundled-sources.ts` でビルド時に組み込みます。`data/` にJSONを足したら、ここにも足してください（足し忘れはテストで落ちます）。
 
 ## しくみ
 
-回収日を1日ずつ持たず、「毎週〇曜」「第n〇曜」のルールと例外日で表現しています。
+収集日を1日ずつ持たず、「毎週〇曜」「第n〇曜」のルールと例外日で表現しています。
 
 - `data/raw/suginami-2026-garbage.csv` … 区の収集曜日検索が使っているCSV（町丁目 × ごみ種別 × 曜日）
 - `data/raw/suginami-postal-codes.csv` … 日本郵便の郵便番号データ（utf_ken_all.csv）から杉並区の行を抜き出したもの
@@ -144,12 +147,12 @@ src/
 テストも同じ分け方です。
 
 - `test/domain/` … 架空の区のデータを直接渡す単体テスト（年度またぎなど）
-- `test/http/controller.test.ts` … domain の偽物を渡して、ステータスとボディだけを確かめる
-- `test/data/` … データファイルの読み込み。日付が壊れていれば起動時に例外になる
+- `test/http/controller.test.ts` … domainの偽物を渡して、ステータスとボディだけを確かめる
+- `test/data/` … データファイルの読み込み。日付がおかしければ起動時に例外になる
 - `test/integration/` … 杉並区の実データ。期待値は区の収集カレンダー(PDF)から転記
 - `test/http/server.test.ts` … `main.ts` と同じ組み立てでHTTP越しに通す
 
-杉並区のルールで確認したこと（令和8年度版カレンダーPDFより）:
+杉並区のルールについて、令和8年度版のカレンダーPDFで次のことを確認しました。
 
 - 「第1・3月曜」は、その月の1回目（1〜7日）と3回目（15〜21日）の月曜
 - 祝日も通常どおり収集
