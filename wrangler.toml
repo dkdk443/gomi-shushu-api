@@ -1,0 +1,7 @@
+name = "gomi-shushu-api"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+
+# workers.dev のURLだけを使う。API_TOKEN はここに書かず、wrangler secret put で設定する
+workers_dev = true
+preview_urls = false

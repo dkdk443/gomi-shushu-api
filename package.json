@@ -1,0 +1,23 @@
+{
+  "name": "gomi-shushu-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "住所と日付から、その日のごみ種別を返すAPI（杉並区2026年度版）",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/main.ts",
+    "test": "node --test",
+    "typecheck": "tsc",
+    "build:suginami": "node scripts/build-suginami-2026.ts",
+    "dev:worker": "wrangler dev",
+    "deploy": "npm test && wrangler deploy"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.147.0"
+  }
+}

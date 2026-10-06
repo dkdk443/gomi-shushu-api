@@ -1,0 +1,428 @@
+openapi: 3.1.0
+info:
+  title: ごみ収集日API
+  version: 0.1.0
+  description: |
+    住所（または郵便番号）と日付を渡すと、その日に収集されるごみの種別を返します。
+
+    対応範囲は **東京都杉並区・令和8年度（2026-04-01〜2027-03-31）** だけです。
+
+    ## 住所の指定
+    `address` か `zipcode` のどちらか（または両方）が必要です。
+
+    - `address` では「東京都」「杉並区」を省略できます。全角数字、漢数字の丁目（`一丁目`）、`1-2-3` 形式、`阿佐ヶ谷`・`堀の内` などの表記ゆれも受け付けます
+    - `zipcode` で決まるのは町名までです（杉並区の郵便番号は町名と1対1）
+    - 両方を渡すと、郵便番号の町名と住所が一致するかを確かめたうえで、丁目は住所から決めます
+
+    ## 丁目が決まらないとき
+    郵便番号だけ、または町名だけを渡すと、丁目が決まりません。杉並区の36町のうち16町は、丁目によって収集日が2通りに分かれます。曜日は同じで週だけが違う町もあります（和泉の不燃ごみは、1丁目が第2・4金曜、2〜4丁目が第1・3金曜）。
+
+    - 町内の全丁目で収集日が同じ町では、そのまま答えます（`candidates` は付きません）
+    - 丁目で収集日が分かれる町では、収集日が同じ丁目のまとまりごとの答えを `candidates` に入れます
+      - その日の答えが全候補で同じなら、`types` にもその答えが入ります
+      - 候補によって答えが分かれる日は、`types` が `null` になります
+
+    ## 収集のルール
+    - 祝日も通常どおり収集します
+    - 令和8年度は 12/31〜1/3 を収集しない予定です。休止期間は区が変更することがあり、その場合はデータの例外日を更新して反映します
+    - 「第1・3月曜」は、その月の1〜7日と15〜21日にある月曜です
+
+    ## 集積所が別の町丁目にある場合
+    このAPIは住所の町丁目から答えます。区のカレンダーにあるとおり、使っている集積所が住所と別の町丁目にある場合は、収集日が違うことがあります。その場合は、集積所のある町丁目を `address` に指定してください。
+
+    ## 出典
+    杉並区「ごみと資源 収集曜日検索」および令和8年度版 収集カレンダーをもとに加工しています。正確な情報は区の公式カレンダーで確認してください。
+
+servers:
+  - url: https://gomi-shushu-api.{account}.workers.dev
+    description: Cloudflare Workers（要認証）
+    variables:
+      account:
+        default: example
+        description: Cloudflare のアカウント名（workers.dev のサブドメイン）
+  - url: http://localhost:3000
+    description: ローカル開発用（npm start。認証なし）
+
+security:
+  - bearerAuth: []
+
+paths:
+  /collections:
+    get:
+      operationId: getCollections
+      summary: 指定した日に収集されるごみの種別
+      parameters:
+        - $ref: "#/components/parameters/address"
+        - $ref: "#/components/parameters/zipcode"
+        - name: date
+          in: query
+          description: 対象の日付。省略すると今日（日本時間）
+          schema:
+            $ref: "#/components/schemas/PlainDate"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionsResponse"
+              examples:
+                丁目まで指定:
+                  summary: GET /collections?address=東京都杉並区天沼3丁目&date=2026-10-07
+                  value:
+                    date: "2026-10-07"
+                    address: { prefecture: 東京都, city: 杉並区, town: 天沼, chome: 3 }
+                    source: suginami-2026
+                    types: [不燃ごみ, 古紙・ペットボトル]
+                収集なし:
+                  summary: GET /collections?address=阿佐谷北1丁目&date=2026-10-06
+                  value:
+                    date: "2026-10-06"
+                    address: { prefecture: 東京都, city: 杉並区, town: 阿佐谷北, chome: 1 }
+                    source: suginami-2026
+                    types: []
+                郵便番号・答えが分かれる日:
+                  summary: GET /collections?zipcode=168-0063&date=2026-10-02（和泉）
+                  value:
+                    date: "2026-10-02"
+                    address: { prefecture: 東京都, city: 杉並区, town: 和泉 }
+                    source: suginami-2026
+                    types: null
+                    candidates:
+                      - { chome: [1], types: [古紙・ペットボトル] }
+                      - { chome: [2, 3, 4], types: [不燃ごみ, 古紙・ペットボトル] }
+                郵便番号・答えが同じ日:
+                  summary: GET /collections?zipcode=168-0063&date=2026-10-06（和泉）
+                  value:
+                    date: "2026-10-06"
+                    address: { prefecture: 東京都, city: 杉並区, town: 和泉 }
+                    source: suginami-2026
+                    types: [びん・かん・プラ]
+                    candidates:
+                      - { chome: [1], types: [びん・かん・プラ] }
+                      - { chome: [2, 3, 4], types: [びん・かん・プラ] }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "503":
+          $ref: "#/components/responses/AuthNotConfigured"
+
+  /calendar:
+    get:
+      operationId: getCalendar
+      summary: 期間内の各日に収集されるごみの種別
+      description: |
+        `from` から `to` まで（両端を含む）の各日について答えます。期間は366日までです。
+
+        期間の一部でも対応年度の外にかかると、`date_out_of_range` になります。
+      parameters:
+        - $ref: "#/components/parameters/address"
+        - $ref: "#/components/parameters/zipcode"
+        - name: from
+          in: query
+          description: 期間の初日。省略すると今日（日本時間）
+          schema:
+            $ref: "#/components/schemas/PlainDate"
+        - name: to
+          in: query
+          description: 期間の最終日。省略すると `from` から7日分（`from` + 6日）
+          schema:
+            $ref: "#/components/schemas/PlainDate"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarResponse"
+              examples:
+                丁目まで指定:
+                  summary: GET /calendar?address=杉並区天沼3丁目&from=2026-10-05&to=2026-10-07
+                  value:
+                    from: "2026-10-05"
+                    to: "2026-10-07"
+                    address: { prefecture: 東京都, city: 杉並区, town: 天沼, chome: 3 }
+                    sources: [suginami-2026]
+                    days:
+                      - { date: "2026-10-05", types: [] }
+                      - { date: "2026-10-06", types: [可燃ごみ] }
+                      - { date: "2026-10-07", types: [不燃ごみ, 古紙・ペットボトル] }
+                郵便番号:
+                  summary: GET /calendar?zipcode=168-0063&from=2026-10-02&to=2026-10-03（和泉）
+                  value:
+                    from: "2026-10-02"
+                    to: "2026-10-03"
+                    address: { prefecture: 東京都, city: 杉並区, town: 和泉 }
+                    sources: [suginami-2026]
+                    days:
+                      - { date: "2026-10-02", types: null }
+                      - { date: "2026-10-03", types: [可燃ごみ] }
+                    candidates:
+                      - chome: [1]
+                        days:
+                          - { date: "2026-10-02", types: [古紙・ペットボトル] }
+                          - { date: "2026-10-03", types: [可燃ごみ] }
+                      - chome: [2, 3, 4]
+                        days:
+                          - { date: "2026-10-02", types: [不燃ごみ, 古紙・ペットボトル] }
+                          - { date: "2026-10-03", types: [可燃ごみ] }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "503":
+          $ref: "#/components/responses/AuthNotConfigured"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Workers 版だけ必要です（`wrangler secret put API_TOKEN` で設定したトークン）。ローカル開発用の `npm start` では認証しません。
+
+  parameters:
+    address:
+      name: address
+      in: query
+      description: 住所。`zipcode` と両方省略することはできません
+      schema:
+        type: string
+      examples:
+        full: { value: 東京都杉並区阿佐谷北1丁目 }
+        short: { value: 阿佐谷北1-2-3 }
+        townOnly: { value: 杉並区和泉 }
+    zipcode:
+      name: zipcode
+      in: query
+      description: 郵便番号（7桁）。ハイフン・全角数字・先頭の「〒」は省略してもしなくてもよい
+      schema:
+        type: string
+      examples:
+        hyphen: { value: 168-0063 }
+        digits: { value: "1680063" }
+
+  schemas:
+    PlainDate:
+      type: string
+      format: date
+      pattern: ^\d{4}-\d{2}-\d{2}$
+      description: YYYY-MM-DD。存在しない日付（2026-02-30 など）は `invalid_date` になります
+      examples: ["2026-10-06"]
+
+    GarbageType:
+      type: string
+      enum: [可燃ごみ, 不燃ごみ, びん・かん・プラ, 古紙・ペットボトル]
+      description: |
+        配列で返すときは、この並び順になります。
+        - びん・かん・プラ: びん、かん、資源プラスチック
+        - 古紙・ペットボトル: 古紙、ペットボトル
+
+    GarbageTypes:
+      type: array
+      items:
+        $ref: "#/components/schemas/GarbageType"
+      description: その日に収集されるごみの種別。収集がなければ空配列
+
+    Address:
+      type: object
+      description: 正規化した住所
+      required: [prefecture, city, town]
+      properties:
+        prefecture: { type: string, examples: [東京都] }
+        city: { type: string, examples: [杉並区] }
+        town: { type: string, description: 正式な町名（`阿佐ヶ谷北` → `阿佐谷北` など）, examples: [阿佐谷北] }
+        chome:
+          type: integer
+          minimum: 1
+          description: 丁目。郵便番号だけ、または町名だけを渡した場合は付きません
+          examples: [1]
+
+    Candidate:
+      type: object
+      required: [chome, types]
+      properties:
+        chome:
+          type: array
+          items: { type: integer }
+          description: 収集日が同じ丁目のまとまり
+          examples: [[2, 3, 4]]
+        types:
+          $ref: "#/components/schemas/GarbageTypes"
+
+    CollectionsResponse:
+      type: object
+      required: [date, address, source, types]
+      properties:
+        date:
+          $ref: "#/components/schemas/PlainDate"
+        address:
+          $ref: "#/components/schemas/Address"
+        source:
+          type: string
+          description: 使ったデータ（自治体・年度）
+          examples: [suginami-2026]
+        types:
+          oneOf:
+            - $ref: "#/components/schemas/GarbageTypes"
+            - type: "null"
+          description: 丁目が決まらず、候補によって答えが分かれる日は `null`
+        candidates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Candidate"
+          description: 丁目が決まらず、町内で収集日が分かれるときだけ付きます
+
+    CalendarDay:
+      type: object
+      required: [date, types]
+      properties:
+        date:
+          $ref: "#/components/schemas/PlainDate"
+        types:
+          oneOf:
+            - $ref: "#/components/schemas/GarbageTypes"
+            - type: "null"
+          description: 丁目が決まらず、候補によって答えが分かれる日は `null`
+
+    CandidateCalendar:
+      type: object
+      required: [chome, days]
+      properties:
+        chome:
+          type: array
+          items: { type: integer }
+          description: 収集日が同じ丁目のまとまり
+        days:
+          type: array
+          items:
+            type: object
+            required: [date, types]
+            properties:
+              date:
+                $ref: "#/components/schemas/PlainDate"
+              types:
+                $ref: "#/components/schemas/GarbageTypes"
+
+    CalendarResponse:
+      type: object
+      required: [from, to, address, sources, days]
+      properties:
+        from:
+          $ref: "#/components/schemas/PlainDate"
+        to:
+          $ref: "#/components/schemas/PlainDate"
+        address:
+          $ref: "#/components/schemas/Address"
+        sources:
+          type: array
+          items: { type: string }
+          description: 使ったデータ。期間が年度をまたぐと複数になります
+          examples: [[suginami-2026]]
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/CalendarDay"
+          description: from から to までの全日（収集のない日も含む）
+        candidates:
+          type: array
+          items:
+            $ref: "#/components/schemas/CandidateCalendar"
+          description: 丁目が決まらず、町内で収集日が分かれるときだけ付きます
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum:
+                - missing_address
+                - invalid_date
+                - invalid_range
+                - invalid_postal_code
+                - postal_code_mismatch
+                - unauthorized
+                - unsupported_postal_code
+                - unsupported_city
+                - unknown_town
+                - unknown_chome
+                - date_out_of_range
+                - not_found
+                - method_not_allowed
+                - auth_not_configured
+            message:
+              type: string
+              description: 人が読むための説明（日本語）。文言は変わることがあるので、判定には `code` を使ってください
+            suggestions:
+              type: array
+              items: { type: string }
+              description: |
+                `unknown_town` では杉並区の町名の一覧、`unknown_chome` ではその町の丁目の一覧（例: `和泉1丁目`）
+
+  responses:
+    BadRequest:
+      description: |
+        パラメータの誤り
+        - `missing_address`: `address` も `zipcode` も無い
+        - `invalid_date`: 日付が YYYY-MM-DD 形式でない、または存在しない日付
+        - `invalid_range`: `/calendar` の `from` が `to` より後、または期間が366日を超える
+        - `invalid_postal_code`: 郵便番号が7桁でない
+        - `postal_code_mismatch`: 郵便番号の町名と `address` の町名が違う
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: { code: invalid_date, message: date は YYYY-MM-DD 形式で指定してください }
+    Unauthorized:
+      description: "`Authorization: Bearer <トークン>` が無い、または違う（Workers 版のみ）"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: { code: unauthorized, message: "Authorization: Bearer <トークン> を付けてください" }
+    NotFound:
+      description: |
+        答えられる住所・期間ではない
+        - `unsupported_postal_code`: 杉並区以外の郵便番号
+        - `unsupported_city`: 杉並区以外の住所
+        - `unknown_town`: 杉並区に無い町名（`suggestions` に町名の一覧）
+        - `unknown_chome`: その町に無い丁目（`suggestions` に丁目の一覧）
+        - `date_out_of_range`: 対応年度の外の日付
+        - `not_found`: 存在しないパス
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: unknown_chome
+              message: 阿佐谷北7丁目は見つかりません
+              suggestions: [阿佐谷北1丁目, 阿佐谷北2丁目, 阿佐谷北3丁目, 阿佐谷北4丁目, 阿佐谷北5丁目, 阿佐谷北6丁目]
+    MethodNotAllowed:
+      description: GET 以外のメソッド
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    AuthNotConfigured:
+      description: Workers に `API_TOKEN` が設定されていない。設定漏れで公開状態にならないよう、すべてのリクエストを拒否します
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

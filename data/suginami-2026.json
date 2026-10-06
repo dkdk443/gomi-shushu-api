@@ -1,0 +1,2040 @@
+{
+  "id": "suginami-2026",
+  "prefecture": "東京都",
+  "city": "杉並区",
+  "validFrom": "2026-04-01",
+  "validTo": "2027-03-31",
+  "attribution": {
+    "name": "杉並区「ごみと資源 収集曜日検索」および令和8年度版 収集カレンダー",
+    "url": "https://www.city.suginami.tokyo.jp/kurashi/gomi/"
+  },
+  "aliases": {
+    "阿佐ヶ谷北": "阿佐谷北",
+    "阿佐ヶ谷南": "阿佐谷南",
+    "阿佐ケ谷北": "阿佐谷北",
+    "阿佐ケ谷南": "阿佐谷南",
+    "堀の内": "堀ノ内",
+    "松の木": "松ノ木"
+  },
+  "postalCodes": {
+    "1660001": "阿佐谷北",
+    "1660002": "高円寺北",
+    "1660003": "高円寺南",
+    "1660004": "阿佐谷南",
+    "1660011": "梅里",
+    "1660012": "和田",
+    "1660013": "堀ノ内",
+    "1660014": "松ノ木",
+    "1660015": "成田東",
+    "1660016": "成田西",
+    "1670021": "井草",
+    "1670022": "下井草",
+    "1670023": "上井草",
+    "1670031": "本天沼",
+    "1670032": "天沼",
+    "1670033": "清水",
+    "1670034": "桃井",
+    "1670035": "今川",
+    "1670041": "善福寺",
+    "1670042": "西荻北",
+    "1670043": "上荻",
+    "1670051": "荻窪",
+    "1670052": "南荻窪",
+    "1670053": "西荻南",
+    "1670054": "松庵",
+    "1680061": "大宮",
+    "1680062": "方南",
+    "1680063": "和泉",
+    "1680064": "永福",
+    "1680065": "浜田山",
+    "1680071": "高井戸西",
+    "1680072": "高井戸東",
+    "1680073": "下高井戸",
+    "1680074": "上高井戸",
+    "1680081": "宮前",
+    "1680082": "久我山"
+  },
+  "exceptions": [
+    {
+      "date": "2026-12-31",
+      "action": "cancel",
+      "note": "年末年始"
+    },
+    {
+      "date": "2027-01-01",
+      "action": "cancel",
+      "note": "年末年始"
+    },
+    {
+      "date": "2027-01-02",
+      "action": "cancel",
+      "note": "年末年始"
+    },
+    {
+      "date": "2027-01-03",
+      "action": "cancel",
+      "note": "年末年始"
+    }
+  ],
+  "areas": [
+    {
+      "town": "阿佐谷北",
+      "chome": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 1,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 5
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 1
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/12.pdf"
+    },
+    {
+      "town": "阿佐谷南",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 1,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 5
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 1
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/11.pdf"
+    },
+    {
+      "town": "天沼",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 3,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 3
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/2.pdf"
+    },
+    {
+      "town": "井草",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 3,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 3
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/1.pdf"
+    },
+    {
+      "town": "井草",
+      "chome": [
+        4,
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/8.pdf"
+    },
+    {
+      "town": "和泉",
+      "chome": [
+        1
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 2
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/27.pdf"
+    },
+    {
+      "town": "和泉",
+      "chome": [
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 2
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/28.pdf"
+    },
+    {
+      "town": "今川",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/8.pdf"
+    },
+    {
+      "town": "今川",
+      "chome": [
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/9.pdf"
+    },
+    {
+      "town": "梅里",
+      "chome": [
+        1
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 5
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/26.pdf"
+    },
+    {
+      "town": "梅里",
+      "chome": [
+        2
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 1,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 5
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 1
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/11.pdf"
+    },
+    {
+      "town": "永福",
+      "chome": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 3,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 3
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/19.pdf"
+    },
+    {
+      "town": "大宮",
+      "chome": [
+        1,
+        2
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 5
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/26.pdf"
+    },
+    {
+      "town": "荻窪",
+      "chome": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 4,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 2
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 4
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/14.pdf"
+    },
+    {
+      "town": "上井草",
+      "chome": [
+        1,
+        2
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/8.pdf"
+    },
+    {
+      "town": "上井草",
+      "chome": [
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/9.pdf"
+    },
+    {
+      "town": "上荻",
+      "chome": [
+        1
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 4,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 2
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 4
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/14.pdf"
+    },
+    {
+      "town": "上荻",
+      "chome": [
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/10.pdf"
+    },
+    {
+      "town": "上高井戸",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/3.pdf"
+    },
+    {
+      "town": "久我山",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/3.pdf"
+    },
+    {
+      "town": "久我山",
+      "chome": [
+        4,
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/4.pdf"
+    },
+    {
+      "town": "高円寺北",
+      "chome": [
+        1
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 1,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 1
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/18.pdf"
+    },
+    {
+      "town": "高円寺北",
+      "chome": [
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 4,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 4
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/24.pdf"
+    },
+    {
+      "town": "高円寺南",
+      "chome": [
+        1,
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 1,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 1
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/18.pdf"
+    },
+    {
+      "town": "高円寺南",
+      "chome": [
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 4,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 4
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/23.pdf"
+    },
+    {
+      "town": "清水",
+      "chome": [
+        1,
+        2
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 3,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 3
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/2.pdf"
+    },
+    {
+      "town": "清水",
+      "chome": [
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 3,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 3
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/1.pdf"
+    },
+    {
+      "town": "下井草",
+      "chome": [
+        1
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 1,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 1
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/15.pdf"
+    },
+    {
+      "town": "下井草",
+      "chome": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 3,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 3
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/1.pdf"
+    },
+    {
+      "town": "下高井戸",
+      "chome": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 3,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 3
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/20.pdf"
+    },
+    {
+      "town": "下高井戸",
+      "chome": [
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 3
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/21.pdf"
+    },
+    {
+      "town": "松庵",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 3
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/7.pdf"
+    },
+    {
+      "town": "善福寺",
+      "chome": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/9.pdf"
+    },
+    {
+      "town": "高井戸西",
+      "chome": [
+        1
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/3.pdf"
+    },
+    {
+      "town": "高井戸西",
+      "chome": [
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/4.pdf"
+    },
+    {
+      "town": "高井戸東",
+      "chome": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 3
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/22.pdf"
+    },
+    {
+      "town": "成田西",
+      "chome": [
+        1,
+        2
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 4,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 2
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 4
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/13.pdf"
+    },
+    {
+      "town": "成田西",
+      "chome": [
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 4,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 2
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 4
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/14.pdf"
+    },
+    {
+      "town": "成田東",
+      "chome": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 4,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 2
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 4
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/13.pdf"
+    },
+    {
+      "town": "西荻北",
+      "chome": [
+        1,
+        2
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 3
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/6.pdf"
+    },
+    {
+      "town": "西荻北",
+      "chome": [
+        3,
+        4,
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 3
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/16.pdf"
+    },
+    {
+      "town": "西荻南",
+      "chome": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 3
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/7.pdf"
+    },
+    {
+      "town": "浜田山",
+      "chome": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 3
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/21.pdf"
+    },
+    {
+      "town": "方南",
+      "chome": [
+        1,
+        2
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 2
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/27.pdf"
+    },
+    {
+      "town": "堀ノ内",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 5
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/25.pdf"
+    },
+    {
+      "town": "本天沼",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 3,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 3
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/2.pdf"
+    },
+    {
+      "town": "松ノ木",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 3
+          },
+          {
+            "weekday": 6
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 5
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/26.pdf"
+    },
+    {
+      "town": "南荻窪",
+      "chome": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 3
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/6.pdf"
+    },
+    {
+      "town": "宮前",
+      "chome": [
+        1,
+        4,
+        5
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 2,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 2
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/4.pdf"
+    },
+    {
+      "town": "宮前",
+      "chome": [
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 1
+          },
+          {
+            "weekday": 4
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 5,
+            "nth": [
+              1,
+              3
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 6
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 5
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/5.pdf"
+    },
+    {
+      "town": "桃井",
+      "chome": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 6,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 1
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 6
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/8.pdf"
+    },
+    {
+      "town": "和田",
+      "chome": [
+        1,
+        2,
+        3
+      ],
+      "rules": {
+        "可燃ごみ": [
+          {
+            "weekday": 2
+          },
+          {
+            "weekday": 5
+          }
+        ],
+        "不燃ごみ": [
+          {
+            "weekday": 1,
+            "nth": [
+              2,
+              4
+            ]
+          }
+        ],
+        "びん・かん・プラ": [
+          {
+            "weekday": 4
+          }
+        ],
+        "古紙・ペットボトル": [
+          {
+            "weekday": 1
+          }
+        ]
+      },
+      "calendarUrl": "https://www.city.suginami.tokyo.jp/shared/garbage/17.pdf"
+    }
+  ]
+}
