@@ -8,6 +8,7 @@ import type { PlainDate } from "./domain/types.ts";
 import { authorize } from "./http/auth.ts";
 import { createController, error, type HttpResponse } from "./http/controller.ts";
 import { route } from "./http/router.ts";
+import { reminderFlex } from "./notify/flex.ts";
 import { pushLineMessage } from "./notify/line.ts";
 import { reminderMessage } from "./notify/message.ts";
 
@@ -19,6 +20,8 @@ export interface Env {
   LINE_USER_ID?: string;
   // 例: 杉並区阿佐谷北1丁目
   NOTIFY_ADDRESS?: string;
+  // 通知カードの画像（public/images/）を配っている、この Worker のURL。未設定なら画像なしで送る
+  PUBLIC_BASE_URL?: string;
 }
 
 // Workers の ScheduledController のうち使う部分
@@ -42,22 +45,46 @@ function toResponse({ status, body }: HttpResponse): Response {
 
 class NotifyNotConfiguredError extends Error {}
 
-// date の分の通知を送り、送った文面を返す。収集がない日は送らずに undefined。prefix はテスト送信の目印
-async function notify(env: Env, date: PlainDate, fetchFn: typeof fetch, prefix = ""): Promise<string | undefined> {
+interface Sent {
+  // 通知やトーク一覧に出る1行
+  text: string;
+  // カードを LINE に断られてテキストで送り直したとき、その理由
+  flexError?: string;
+}
+
+// date の分の通知を送る。収集がない日は送らずに undefined。prefix はテスト送信の目印
+async function notify(env: Env, date: PlainDate, fetchFn: typeof fetch, prefix = ""): Promise<Sent | undefined> {
   const { LINE_CHANNEL_ACCESS_TOKEN: token, LINE_USER_ID: to, NOTIFY_ADDRESS: address } = env;
   if (!token || !to || !address) {
     throw new NotifyNotConfiguredError("LINE_CHANNEL_ACCESS_TOKEN / LINE_USER_ID / NOTIFY_ADDRESS が設定されていません");
   }
-  const message = reminderMessage(service.lookup({ address }, date), date);
+  const result = service.lookup({ address }, date);
+  const message = reminderMessage(result, date);
   if (!message) return undefined;
   const text = prefix + message;
-  await pushLineMessage(token, to, text, fetchFn);
-  return text;
+
+  // 収集がある日はカードで送る。エラーなどはテキストのまま
+  if (result.ok && result.types !== null && result.types.length > 0) {
+    try {
+      await pushLineMessage(token, to, reminderFlex(date, result.types, result.source, text, {
+        label: prefix || undefined,
+        imageBaseUrl: env.PUBLIC_BASE_URL,
+      }), fetchFn);
+      return { text };
+    } catch (e) {
+      // カードの形が LINE に断られても、通知自体は届くようテキストで送り直す
+      await pushLineMessage(token, to, { type: "text", text }, fetchFn);
+      return { text, flexError: e instanceof Error ? e.message : String(e) };
+    }
+  }
+  await pushLineMessage(token, to, { type: "text", text }, fetchFn);
+  return { text };
 }
 
 // 予定時刻（日本時間）の翌日について通知する
 export async function notifyTomorrow(env: Env, now: Date, fetchFn: typeof fetch = fetch): Promise<void> {
-  await notify(env, addDays(todayInTokyo(now), 1), fetchFn);
+  const sent = await notify(env, addDays(todayInTokyo(now), 1), fetchFn);
+  if (sent?.flexError) console.error(`カードを送れず、テキストで送り直しました: ${sent.flexError}`);
 }
 
 // POST /notify?date=YYYY-MM-DD: Cron を待たずにテスト送信する。date を省略すると翌日。
@@ -67,8 +94,8 @@ export async function handleNotify(env: Env, url: URL, now: Date, fetchFn: typeo
   const date = param === null ? addDays(todayInTokyo(now), 1) : parsePlainDate(param);
   if (!date) return error(400, "invalid_date", "date は YYYY-MM-DD 形式で指定してください");
   try {
-    const text = await notify(env, date, fetchFn, "【テスト送信】");
-    return { status: 200, body: { date, sent: text !== undefined, ...(text && { text }) } };
+    const sent = await notify(env, date, fetchFn, "【テスト送信】");
+    return { status: 200, body: { date, sent: sent !== undefined, ...sent } };
   } catch (e) {
     if (e instanceof NotifyNotConfiguredError) return error(503, "notify_not_configured", e.message);
     return error(502, "line_error", e instanceof Error ? e.message : String(e));

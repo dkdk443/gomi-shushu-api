@@ -59,16 +59,25 @@ describe("翌日の LINE 通知", () => {
     return { fetchFn, sent };
   }
 
-  it("20時（日本時間）に、翌日の種別を送る", async () => {
+  it("20時（日本時間）に、翌日の種別をカードで送る", async () => {
     const { fetchFn, sent } = fakeFetch();
     await notifyTomorrow(ENV, new Date("2026-10-06T11:00:00Z"), fetchFn);
     assert.equal(sent.length, 1);
     assert.equal(sent[0].url, "https://api.line.me/v2/bot/message/push");
     assert.equal((sent[0].init.headers as Record<string, string>).authorization, "Bearer line-token");
-    assert.deepEqual(JSON.parse(sent[0].init.body as string), {
-      to: "U123",
-      messages: [{ type: "text", text: "明日 10/7（水）は可燃ごみの日です" }],
-    });
+    const body = JSON.parse(sent[0].init.body as string);
+    assert.equal(body.to, "U123");
+    assert.equal(body.messages.length, 1);
+    assert.equal(body.messages[0].type, "flex");
+    assert.equal(body.messages[0].altText, "明日 10/7（水）は可燃ごみの日です");
+  });
+
+  it("住所が見つからないなどのときは、テキストで送る", async () => {
+    const { fetchFn, sent } = fakeFetch();
+    await notifyTomorrow({ ...ENV, NOTIFY_ADDRESS: "杉並区存在しない町1丁目" }, new Date("2026-10-06T11:00:00Z"), fetchFn);
+    const message = JSON.parse(sent[0].init.body as string).messages[0];
+    assert.equal(message.type, "text");
+    assert.match(message.text, /unknown_town/);
   });
 
   it("翌日に収集がなければ送らない", async () => {
@@ -100,7 +109,7 @@ describe("POST /notify（テスト送信）", () => {
   function fakeFetch(status = 200) {
     const texts: string[] = [];
     const fetchFn = (async (_url: string, init: RequestInit) => {
-      texts.push(JSON.parse(init.body as string).messages[0].text);
+      texts.push(JSON.parse(init.body as string).messages[0].altText);
       return new Response("{}", { status });
     }) as typeof fetch;
     return { fetchFn, texts };
@@ -139,5 +148,27 @@ describe("POST /notify（テスト送信）", () => {
     assert.equal(unauth.status, 401);
     const get = await worker.fetch(new Request(url(), { headers: { authorization: `Bearer ${TOKEN}` } }), ENV);
     assert.equal(get.status, 405);
+  });
+});
+
+describe("カードを送れなかったとき", () => {
+  const ENV = {
+    API_TOKEN: TOKEN,
+    LINE_CHANNEL_ACCESS_TOKEN: "line-token",
+    LINE_USER_ID: "U123",
+    NOTIFY_ADDRESS: "杉並区阿佐谷北1丁目",
+  };
+
+  it("テキストで送り直し、理由を返す", async () => {
+    const types: string[] = [];
+    const fetchFn = (async (_url: string, init: RequestInit) => {
+      const message = JSON.parse(init.body as string).messages[0];
+      types.push(message.type);
+      return message.type === "flex" ? new Response("invalid flex", { status: 400 }) : new Response("{}");
+    }) as typeof fetch;
+    const res = await handleNotify(ENV, new globalThis.URL("https://example.workers.dev/notify?date=2026-10-07"), new Date(), fetchFn);
+    assert.deepEqual(types, ["flex", "text"]);
+    assert.equal(res.status, 200);
+    assert.match((res.body as { flexError: string }).flexError, /400 invalid flex/);
   });
 });
