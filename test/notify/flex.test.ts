@@ -49,6 +49,22 @@ describe("reminderFlex", () => {
     assert.ok(!json.includes("🔥"));
   });
 
+  it("夜は「明日のごみ」、朝は「今日のごみ」にして、上部の画像も替える", () => {
+    const options = { imageBaseUrl: "https://example.dev" };
+    const evening = JSON.stringify(reminderFlex(d("2026-10-03"), ["可燃ごみ"], "suginami-2026", "x", options).contents);
+    assert.ok(texts(JSON.parse(evening)).includes("明日のごみ"));
+    assert.match(evening, /images\/hero\.png/);
+
+    const morningFlex = reminderFlex(d("2026-10-03"), ["可燃ごみ"], "suginami-2026", "x", { ...options, slot: "morning" });
+    const morning = JSON.stringify(morningFlex.contents);
+    assert.ok(texts(morningFlex.contents).includes("今日のごみ"));
+    assert.match(morning, /images\/hero-morning\.png/);
+    assert.notEqual(
+      (morningFlex.contents as { header: { backgroundColor: string } }).header.backgroundColor,
+      (JSON.parse(evening) as { header: { backgroundColor: string } }).header.backgroundColor,
+    );
+  });
+
   it("画像のURLがなければ、上部の画像を付けず絵文字を使う", () => {
     assert.ok(!JSON.stringify(flex.contents).includes('"hero"'));
   });

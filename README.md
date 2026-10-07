@@ -119,11 +119,11 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ### LINE通知
 
-毎日20時（日本時間）に、登録した住所の翌日のごみをLINEに送ります（`wrangler.toml` の Cron Trigger）。翌日に収集がなければ送りません。
+毎日7時（日本時間）に当日の、20時に翌日のごみを、登録した住所についてLINEに送ります（`wrangler.toml` の Cron Trigger）。その日に収集がなければ送りません。
 
-収集がある日は、種別ごとに絵文字と色を付けたカード（Flex Message、`src/notify/flex.ts`）で送ります。通知やトーク一覧には「明日 10/7（水）は可燃ごみの日です」の1行が出ます。カードの形をLINEに断られたときは、同じ1行をテキストで送り直します。
+収集がある日は、種別ごとに絵文字と色を付けたカード（Flex Message、`src/notify/flex.ts`）で送ります。送る時間帯でカードの見た目を変え、7時は朝の空の画像と「今日のごみ」、20時は夜の画像と「明日のごみ」にします（`src/notify/slot.ts`。日本時間の正午より前なら朝）。通知やトーク一覧には「明日 10/7（水）は可燃ごみの日です」（朝は「今日 …」）の1行が出ます。カードの形をLINEに断られたときは、同じ1行をテキストで送り直します。
 
-カードの画像（上部の夜の集積所と、種別ごとのアイコン）は `public/images/` に置き、Workersの静的アセットとして配ります。LINEのサーバーが取りに来るので、画像は認証なしで見られます（`public/` に秘密のものは置かない）。画像を使うには、このWorkerのURLを `PUBLIC_BASE_URL` に設定します。未設定なら画像なしで、絵文字のカードを送ります。画像を差し替えたら、LINEのキャッシュを避けるため `src/notify/flex.ts` の `IMAGE_VERSION` を上げてください。住所が見つからない・データの期間が切れたなど、調べられなかったときはその旨をテキストで送ります。
+カードの画像（上部の朝と夜の集積所と、種別ごとのアイコン）は `public/images/` に置き、Workersの静的アセットとして配ります。LINEのサーバーが取りに来るので、画像は認証なしで見られます（`public/` に秘密のものは置かない）。画像を使うには、このWorkerのURLを `PUBLIC_BASE_URL` に設定します。未設定なら画像なしで、絵文字のカードを送ります。画像を差し替えたら、LINEのキャッシュを避けるため `src/notify/flex.ts` の `IMAGE_VERSION` を上げてください。住所が見つからない・データの期間が切れたなど、調べられなかったときはその旨をテキストで送ります。
 
 LINE公式アカウントを作ってMessaging APIを有効にし、チャネルアクセストークン（長期）と自分のユーザーIDを用意してから、次を設定します。住所も公開リポジトリに書かないよう secret にしています。
 
@@ -134,15 +134,15 @@ npx wrangler secret put NOTIFY_ADDRESS   # 例: 杉並区阿佐谷北1丁目（�
 npx wrangler secret put PUBLIC_BASE_URL  # 例: https://gomi-shushu-api.<アカウント>.workers.dev（画像を使うとき）
 ```
 
-20時を待たずに試すときは、`POST /notify` でテスト送信します。文面はCronと同じで、先頭に【テスト送信】が付きます。`date` を省略すると翌日分で、収集がない日は送らずに `"sent": false` を返すので、収集がある日を `date` に指定してください。
+Cronを待たずに試すときは、`POST /notify` でテスト送信します。文面はCronと同じで、先頭に【テスト送信】が付きます。時間帯は送った時刻で決まり、`slot=morning` か `slot=evening` で指定もできます。`date` を省略すると朝は当日分、夜は翌日分で、収集がない日は送らずに `"sent": false` を返すので、収集がある日を `date` に指定してください。
 
 ```sh
 curl -X POST -H "Authorization: Bearer $TOKEN" \
   "https://gomi-shushu-api.<アカウント>.workers.dev/notify?date=2026-10-07"
-# 住所が阿佐谷北1丁目なら {"date":"2026-10-07","sent":true,"text":"【テスト送信】明日 10/7（水）は可燃ごみの日です"}
+# 午後に送り、住所が阿佐谷北1丁目なら {"date":"2026-10-07","slot":"evening","sent":true,"text":"【テスト送信】明日 10/7（水）は可燃ごみの日です"}
 ```
 
-手元で試すときは、`.dev.vars` に同じ3つを書いて `npx wrangler dev --test-scheduled` を実行し、`curl "http://localhost:8787/__scheduled?cron=0+11+*+*+*"` で呼び出します。実際にLINEへ送られます。
+手元で試すときは、`.dev.vars` に同じ3つを書いて `npx wrangler dev --test-scheduled` を実行し、`curl "http://localhost:8787/__scheduled?cron=0+11+*+*+*"` で呼び出します（時間帯は呼び出した時刻で決まります）。実際にLINEへ送られます。
 
 Workersではファイルを読めないので、データは `src/data/bundled-sources.ts` でビルド時に組み込みます。`data/` にJSONを足したら、ここにも足してください（足し忘れはテストで落ちます）。
 
@@ -174,11 +174,12 @@ src/
     controller.ts    クエリ → domain の入力、結果 → ステータスとJSON。省略時の日付や期間の上限もここ
     server.ts        ルーティングと node:http
   notify/
-    message.ts       翌日のごみの通知文（収集なしなら送らない）
-    flex.ts          通知のカード（種別ごとのアイコン・絵文字と色）
+    slot.ts          送る時間帯（朝・夜）と、知らせる日（朝は当日、夜は翌日）
+    message.ts       ごみの日の通知文（収集なしなら送らない）
+    flex.ts          通知のカード（種別ごとのアイコン・絵文字と色、時間帯ごとの上の帯と画像）
     line.ts          LINE Messaging API のプッシュ送信
   main.ts          Node で組み立てて起動する（ローカル開発用）
-  worker.ts        Cloudflare Workers の入口。認証してから router に渡す。Cron で翌日の LINE 通知も送る
+  worker.ts        Cloudflare Workers の入口。認証してから router に渡す。Cron で朝と夜の LINE 通知も送る
 ```
 
 テストも同じ分け方です。
@@ -188,7 +189,7 @@ src/
 - `test/data/` … データファイルの読み込み。日付がおかしければ起動時に例外になる
 - `test/integration/` … 杉並区の実データ。期待値は区の収集カレンダー(PDF)から転記
 - `test/http/server.test.ts` … `main.ts` と同じ組み立てでHTTP越しに通す
-- `test/notify/` … 通知文とカードの組み立て
+- `test/notify/` … 時間帯の判定と、通知文・カードの組み立て
 - `test/worker.test.ts` … 認証と、LINE通知（fetch の偽物を渡して、送る内容と送らない日を確かめる）
 
 杉並区のルールについて、令和8年度版のカレンダーPDFで次のことを確認しました。

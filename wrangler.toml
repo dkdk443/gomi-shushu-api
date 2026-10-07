@@ -6,9 +6,9 @@ compatibility_date = "2026-10-01"
 workers_dev = true
 preview_urls = false
 
-# 毎日20時（日本時間）に翌日のごみを LINE に通知する。cron は UTC で書く
+# 毎日7時（日本時間）に当日の、20時に翌日のごみを LINE に通知する。cron は UTC で書く
 [triggers]
-crons = ["0 11 * * *"]
+crons = ["0 22 * * *", "0 11 * * *"]
 
 # 通知カードの画像。LINE のサーバーが取りに来るので、認証より先に配る（public/ に秘密のものは置かない）
 [assets]

@@ -15,6 +15,11 @@ describe("reminderMessage", () => {
     assert.equal(text, "明日 10/2（金）は不燃ごみ・古紙・ペットボトルの日です");
   });
 
+  it("朝の通知では「今日」にする", () => {
+    const text = reminderMessage({ ok: true, source: "fake", address: ADDRESS, types: ["不燃ごみ"] }, DATE, "morning");
+    assert.equal(text, "今日 10/2（金）は不燃ごみの日です");
+  });
+
   it("収集がない日は送らない", () => {
     assert.equal(reminderMessage({ ok: true, source: "fake", address: ADDRESS, types: [] }, DATE), undefined);
   });

@@ -1,7 +1,8 @@
-// 翌日のごみを、色と絵文字で見分けられる LINE の Flex Message（カード）にする
+// ごみの日を、色と絵文字で見分けられる LINE の Flex Message（カード）にする
 // https://developers.line.biz/ja/docs/messaging-api/using-flex-messages/
 import { weekdayOf } from "../domain/date.ts";
 import type { PlainDate } from "../domain/types.ts";
+import type { TimeSlot } from "./slot.ts";
 
 interface TypeStyle {
   emoji: string;
@@ -28,13 +29,46 @@ const DEADLINES: Record<string, string> = {
   "suginami-2026": "朝8時までに出してね",
 };
 
-// 毎回同じだと見なくなるので、日付で入れ替える
-const CHEERS = ["いってらっしゃい！", "今日もおつかれさま 🌙", "忘れずにね 👋", "ナイスごみ出しを ✨", "おやすみなさい 💤"];
-
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
-const WEEKEND_COLORS: Record<number, string> = { 0: "#FFC9C9", 6: "#A5D8FF" };
-// hero.png の夜空と同じ色にして、帯と画像をつなげる
-const HEADER_COLOR = "#1E2A5E";
+
+// 送る時間帯ごとの見た目。上の帯は上部の画像の空と同じ色にして、帯と画像をつなげる
+interface SlotStyle {
+  heading: string;
+  hero: string;
+  headerColor: string;
+  // 「今日のごみ」などの小さい文字
+  subColor: string;
+  // 日付
+  mainColor: string;
+  // テスト送信の目印
+  labelColor: string;
+  weekendColors: Record<number, string>;
+  // 毎回同じだと見なくなるので、日付で入れ替える
+  cheers: readonly string[];
+}
+
+const SLOT_STYLES: Record<TimeSlot, SlotStyle> = {
+  morning: {
+    heading: "今日のごみ",
+    hero: "hero-morning.png",
+    headerColor: "#CDEBFA",
+    subColor: "#3B5B7A",
+    mainColor: "#1E2A5E",
+    labelColor: "#E8590C",
+    weekendColors: { 0: "#E03131", 6: "#1971C2" },
+    cheers: ["いってらっしゃい！", "おはようございます ☀️", "忘れずにね 👋", "ナイスごみ出しを ✨"],
+  },
+  evening: {
+    heading: "明日のごみ",
+    hero: "hero.png",
+    headerColor: "#1E2A5E",
+    subColor: "#C5CAE9",
+    mainColor: "#FFFFFF",
+    labelColor: "#FFE066",
+    weekendColors: { 0: "#FFC9C9", 6: "#A5D8FF" },
+    cheers: ["今日もおつかれさま 🌙", "明日の朝、忘れずにね 👋", "おやすみなさい 💤"],
+  },
+};
 
 export interface FlexMessage {
   type: "flex";
@@ -47,6 +81,8 @@ export interface FlexOptions {
   label?: string;
   // 画像を配っている場所（例: https://….workers.dev）。未設定なら画像なしで、絵文字を使う
   imageBaseUrl?: string;
+  // 送る時間帯。朝は「今日のごみ」、夜は「明日のごみ」で、上の帯と画像も変える
+  slot?: TimeSlot;
 }
 
 function imageUrl(base: string, name: string): string {
@@ -79,12 +115,13 @@ export function reminderFlex(
   types: readonly string[],
   source: string,
   altText: string,
-  { label, imageBaseUrl }: FlexOptions = {},
+  { label, imageBaseUrl, slot = "evening" }: FlexOptions = {},
 ): FlexMessage {
   const [, m, d] = date.split("-").map(Number);
   const weekday = weekdayOf(date);
   const deadline = DEADLINES[source];
-  const cheer = CHEERS[(m * 31 + d) % CHEERS.length];
+  const style = SLOT_STYLES[slot];
+  const cheer = style.cheers[(m * 31 + d) % style.cheers.length];
 
   return {
     type: "flex",
@@ -95,23 +132,23 @@ export function reminderFlex(
       header: {
         type: "box",
         layout: "vertical",
-        backgroundColor: HEADER_COLOR,
+        backgroundColor: style.headerColor,
         paddingAll: "lg",
         contents: [
-          ...(label ? [{ type: "text", text: label, size: "xs", color: "#FFE066", weight: "bold" }] : []),
-          { type: "text", text: "明日のごみ", size: "sm", color: "#C5CAE9" },
+          ...(label ? [{ type: "text", text: label, size: "xs", color: style.labelColor, weight: "bold" }] : []),
+          { type: "text", text: style.heading, size: "sm", color: style.subColor },
           {
             type: "box",
             layout: "baseline",
             spacing: "sm",
             contents: [
-              { type: "text", text: `${m}/${d}`, size: "3xl", weight: "bold", color: "#FFFFFF", flex: 0 },
+              { type: "text", text: `${m}/${d}`, size: "3xl", weight: "bold", color: style.mainColor, flex: 0 },
               {
                 type: "text",
                 text: `（${WEEKDAYS[weekday]}）`,
                 size: "lg",
                 weight: "bold",
-                color: WEEKEND_COLORS[weekday] ?? "#FFFFFF",
+                color: style.weekendColors[weekday] ?? style.mainColor,
                 flex: 0,
               },
             ],
@@ -121,7 +158,7 @@ export function reminderFlex(
       ...(imageBaseUrl && {
         hero: {
           type: "image",
-          url: imageUrl(imageBaseUrl, "hero.png"),
+          url: imageUrl(imageBaseUrl, style.hero),
           size: "full",
           aspectRatio: "2:1",
           aspectMode: "cover",
