@@ -1,73 +1,41 @@
-// ごみの日を、色と絵文字で見分けられる LINE の Flex Message（カード）にする
+// ごみの日を、色とアイコンで見分けられる LINE の Flex Message（カード）にする
 // https://developers.line.biz/ja/docs/messaging-api/using-flex-messages/
 import { weekdayOf } from "../domain/date.ts";
 import type { PlainDate } from "../domain/types.ts";
+import { deadlineOf } from "./deadline.ts";
 import type { TimeSlot } from "./slot.ts";
 
 interface TypeStyle {
   emoji: string;
   // public/images/ のアイコン
   icon: string;
-  color: string;
+  // アイコンの下地や、種別の行の背景
   background: string;
 }
 
 // 種別ごとの見た目。知らない種別（ほかの自治体を足したとき）は DEFAULT_STYLE
 const STYLES: Record<string, TypeStyle> = {
-  "可燃ごみ": { emoji: "🔥", icon: "kanen.png", color: "#E8590C", background: "#FFF4E6" },
-  "不燃ごみ": { emoji: "🔩", icon: "funen.png", color: "#4263EB", background: "#EDF2FF" },
-  "びん・かん・プラ": { emoji: "🥫", icon: "bin-kan-pura.png", color: "#0CA678", background: "#E6FCF5" },
-  "古紙・ペットボトル": { emoji: "📰", icon: "koshi-petbottle.png", color: "#E67700", background: "#FFF9DB" },
+  "可燃ごみ": { emoji: "🔥", icon: "kanen.png", background: "#FFF4E6" },
+  "不燃ごみ": { emoji: "🔩", icon: "funen.png", background: "#EDF2FF" },
+  "びん・かん・プラ": { emoji: "🥫", icon: "bin-kan-pura.png", background: "#E6FCF5" },
+  "古紙・ペットボトル": { emoji: "📰", icon: "koshi-petbottle.png", background: "#FFF9DB" },
 };
-const DEFAULT_STYLE: TypeStyle = { emoji: "🗑️", icon: "default.png", color: "#495057", background: "#F1F3F5" };
+const DEFAULT_STYLE: TypeStyle = { emoji: "🗑️", icon: "default.png", background: "#F1F3F5" };
 
 // LINE は画像をURLごとにキャッシュするので、画像を差し替えたら上げる
 const IMAGE_VERSION = 1;
 
-// 出す時刻の締め切り。ソースごとに区の案内に合わせる
-const DEADLINES: Record<string, string> = {
-  "suginami-2026": "朝8時までに出してね",
-};
-
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
-// 送る時間帯ごとの見た目。上の帯は上部の画像の空と同じ色にして、帯と画像をつなげる
-interface SlotStyle {
-  heading: string;
-  hero: string;
-  headerColor: string;
-  // 「今日のごみ」などの小さい文字
-  subColor: string;
-  // 日付
-  mainColor: string;
-  // テスト送信の目印
-  labelColor: string;
-  weekendColors: Record<number, string>;
-  // 毎回同じだと見なくなるので、日付で入れ替える
-  cheers: readonly string[];
-}
+const TEXT_COLOR = "#1E2A4A";
+const SUB_COLOR = "#5C6B80";
+// テスト送信の目印
+const LABEL_COLOR = "#E8590C";
 
-const SLOT_STYLES: Record<TimeSlot, SlotStyle> = {
-  morning: {
-    heading: "今日のごみ",
-    hero: "hero-morning.png",
-    headerColor: "#CDEBFA",
-    subColor: "#3B5B7A",
-    mainColor: "#1E2A5E",
-    labelColor: "#E8590C",
-    weekendColors: { 0: "#E03131", 6: "#1971C2" },
-    cheers: ["いってらっしゃい！", "おはようございます ☀️", "忘れずにね 👋", "ナイスごみ出しを ✨"],
-  },
-  evening: {
-    heading: "明日のごみ",
-    hero: "hero.png",
-    headerColor: "#1E2A5E",
-    subColor: "#C5CAE9",
-    mainColor: "#FFFFFF",
-    labelColor: "#FFE066",
-    weekendColors: { 0: "#FFC9C9", 6: "#A5D8FF" },
-    cheers: ["今日もおつかれさま 🌙", "明日の朝、忘れずにね 👋", "おやすみなさい 💤"],
-  },
+// 送る時間帯ごとの見出しと上部の画像
+const SLOT_STYLES: Record<TimeSlot, { heading: string; hero: string }> = {
+  morning: { heading: "きょうのごみ", hero: "hero-morning.png" },
+  evening: { heading: "あしたのごみ", hero: "hero.png" },
 };
 
 export interface FlexMessage {
@@ -81,7 +49,7 @@ export interface FlexOptions {
   label?: string;
   // 画像を配っている場所（例: https://….workers.dev）。未設定なら画像なしで、絵文字を使う
   imageBaseUrl?: string;
-  // 送る時間帯。朝は「今日のごみ」、夜は「明日のごみ」で、上の帯と画像も変える
+  // 送る時間帯。朝は「きょうのごみ」、夜は「あしたのごみ」で、上部の画像も変える
   slot?: TimeSlot;
 }
 
@@ -89,24 +57,86 @@ function imageUrl(base: string, name: string): string {
   return `${base.replace(/\/$/, "")}/images/${name}?v=${IMAGE_VERSION}`;
 }
 
-function typeRow(type: string, imageBaseUrl: string | undefined) {
+function icon(style: TypeStyle, imageBaseUrl: string | undefined, size: string) {
+  return imageBaseUrl
+    ? { type: "image", url: imageUrl(imageBaseUrl, style.icon), size, aspectRatio: "1:1" }
+    : { type: "text", text: style.emoji, size: "xxl", align: "center" };
+}
+
+// 締め切りと一言。例: 朝8:00までに集積所へ。今夜のうちに玄関にまとめておくと安心です。
+// 種別が複数なら「どちらも」「どれも」を付け、一言は省く。何も書くことがなければ undefined
+function note(slot: TimeSlot, deadline: string | undefined, count: number): string | undefined {
+  const until = deadline
+    ? `${count === 1 ? "" : count === 2 ? "どちらも" : "どれも"}${slot === "evening" ? "朝" : ""}${deadline}までに集積所へ。`
+    : "";
+  const tip = count > 1 ? "" : slot === "evening" ? "今夜のうちに玄関にまとめておくと安心です。" : "出かける前にお忘れなく。";
+  return until + tip || undefined;
+}
+
+// 1種類の日: 大きなアイコンと種別名、その下に日付
+function singleType(heading: string, type: string, dateText: string, imageBaseUrl: string | undefined) {
   const style = STYLES[type] ?? DEFAULT_STYLE;
-  const icon = imageBaseUrl
-    ? { type: "image", url: imageUrl(imageBaseUrl, style.icon), size: "44px", aspectRatio: "1:1", flex: 0 }
-    : { type: "text", text: style.emoji, size: "xxl", flex: 0 };
-  return {
-    type: "box",
-    layout: "horizontal",
-    backgroundColor: style.background,
-    cornerRadius: "lg",
-    paddingAll: "lg",
-    spacing: "lg",
-    alignItems: "center",
-    contents: [
-      icon,
-      { type: "text", text: type, size: "lg", weight: "bold", color: style.color, wrap: true },
-    ],
-  };
+  return [
+    { type: "text", text: heading, size: "sm", weight: "bold", color: SUB_COLOR },
+    {
+      type: "box",
+      layout: "horizontal",
+      spacing: "lg",
+      alignItems: "center",
+      contents: [
+        {
+          type: "box",
+          layout: "vertical",
+          width: "72px",
+          height: "72px",
+          flex: 0,
+          backgroundColor: style.background,
+          cornerRadius: "xl",
+          justifyContent: "center",
+          alignItems: "center",
+          contents: [icon(style, imageBaseUrl, "56px")],
+        },
+        {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            { type: "text", text: type, size: "xxl", weight: "bold", color: TEXT_COLOR, wrap: true },
+            { type: "text", text: dateText, size: "md", color: SUB_COLOR },
+          ],
+        },
+      ],
+    },
+  ];
+}
+
+// 2種類以上の日: 見出しの右に日付、種別ごとに色の付いた行
+function multipleTypes(heading: string, types: readonly string[], dateText: string, imageBaseUrl: string | undefined) {
+  return [
+    {
+      type: "box",
+      layout: "horizontal",
+      contents: [
+        { type: "text", text: `${heading}・${types.length}種類`, size: "sm", weight: "bold", color: SUB_COLOR },
+        { type: "text", text: dateText, size: "sm", color: SUB_COLOR, align: "end" },
+      ],
+    },
+    ...types.map((type) => {
+      const style = STYLES[type] ?? DEFAULT_STYLE;
+      return {
+        type: "box",
+        layout: "horizontal",
+        backgroundColor: style.background,
+        cornerRadius: "xl",
+        paddingAll: "lg",
+        spacing: "lg",
+        alignItems: "center",
+        contents: [
+          { type: "box", layout: "vertical", width: "56px", flex: 0, contents: [icon(style, imageBaseUrl, "56px")] },
+          { type: "text", text: type, size: "lg", weight: "bold", color: TEXT_COLOR, wrap: true },
+        ],
+      };
+    }),
+  ];
 }
 
 // altText は通知やトーク一覧に出る1行
@@ -118,47 +148,20 @@ export function reminderFlex(
   { label, imageBaseUrl, slot = "evening" }: FlexOptions = {},
 ): FlexMessage {
   const [, m, d] = date.split("-").map(Number);
-  const weekday = weekdayOf(date);
-  const deadline = DEADLINES[source];
-  const style = SLOT_STYLES[slot];
-  const cheer = style.cheers[(m * 31 + d) % style.cheers.length];
+  const dateText = `${m}月${d}日（${WEEKDAYS[weekdayOf(date)]}）`;
+  const { heading, hero } = SLOT_STYLES[slot];
+  const noteText = note(slot, deadlineOf(source), types.length);
 
   return {
     type: "flex",
     altText,
     contents: {
       type: "bubble",
-      size: "kilo",
-      header: {
-        type: "box",
-        layout: "vertical",
-        backgroundColor: style.headerColor,
-        paddingAll: "lg",
-        contents: [
-          ...(label ? [{ type: "text", text: label, size: "xs", color: style.labelColor, weight: "bold" }] : []),
-          { type: "text", text: style.heading, size: "sm", color: style.subColor },
-          {
-            type: "box",
-            layout: "baseline",
-            spacing: "sm",
-            contents: [
-              { type: "text", text: `${m}/${d}`, size: "3xl", weight: "bold", color: style.mainColor, flex: 0 },
-              {
-                type: "text",
-                text: `（${WEEKDAYS[weekday]}）`,
-                size: "lg",
-                weight: "bold",
-                color: style.weekendColors[weekday] ?? style.mainColor,
-                flex: 0,
-              },
-            ],
-          },
-        ],
-      },
+      size: "mega",
       ...(imageBaseUrl && {
         hero: {
           type: "image",
-          url: imageUrl(imageBaseUrl, style.hero),
+          url: imageUrl(imageBaseUrl, hero),
           size: "full",
           aspectRatio: "2:1",
           aspectMode: "cover",
@@ -167,18 +170,14 @@ export function reminderFlex(
       body: {
         type: "box",
         layout: "vertical",
-        spacing: "md",
-        paddingAll: "lg",
-        contents: types.map((type) => typeRow(type, imageBaseUrl)),
-      },
-      footer: {
-        type: "box",
-        layout: "vertical",
-        paddingTop: "none",
-        paddingAll: "lg",
+        spacing: "lg",
+        paddingAll: "xl",
         contents: [
-          ...(deadline ? [{ type: "text", text: `⏰ ${deadline}`, size: "sm", color: "#495057", weight: "bold" }] : []),
-          { type: "text", text: cheer, size: "xs", color: "#868E96", margin: "sm" },
+          ...(label ? [{ type: "text", text: label, size: "xs", weight: "bold", color: LABEL_COLOR }] : []),
+          ...(types.length === 1
+            ? singleType(heading, types[0], dateText, imageBaseUrl)
+            : multipleTypes(heading, types, dateText, imageBaseUrl)),
+          ...(noteText ? [{ type: "text", text: noteText, size: "md", color: TEXT_COLOR, wrap: true }] : []),
         ],
       },
     },

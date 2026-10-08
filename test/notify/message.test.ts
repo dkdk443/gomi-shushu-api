@@ -7,17 +7,28 @@ const ADDRESS = { prefecture: "東京都", city: "杉並区", town: "和泉", ch
 const DATE = d("2026-10-02");
 
 describe("reminderMessage", () => {
-  it("収集がある日は、日付・曜日と種別を並べる", () => {
+  it("収集がある日は、種別と日付・曜日を載せる。2種類以上なら数も", () => {
     const text = reminderMessage(
       { ok: true, source: "fake", address: ADDRESS, types: ["不燃ごみ", "古紙・ペットボトル"] },
       DATE,
     );
-    assert.equal(text, "明日 10/2（金）は不燃ごみ・古紙・ペットボトルの日です");
+    assert.equal(text, "明日は2種類：不燃ごみ、古紙・ペットボトル（10/2 金）");
   });
 
-  it("朝の通知では「今日」にする", () => {
-    const text = reminderMessage({ ok: true, source: "fake", address: ADDRESS, types: ["不燃ごみ"] }, DATE, "morning");
-    assert.equal(text, "今日 10/2（金）は不燃ごみの日です");
+  it("1種類なら「〜の日です」", () => {
+    const text = reminderMessage({ ok: true, source: "fake", address: ADDRESS, types: ["不燃ごみ"] }, DATE);
+    assert.equal(text, "明日は不燃ごみの日です（10/2 金）");
+  });
+
+  it("朝の通知は「おはようございます。今日は…」で、締め切りを知っていれば日付の代わりに載せる", () => {
+    assert.equal(
+      reminderMessage({ ok: true, source: "suginami-2026", address: ADDRESS, types: ["不燃ごみ"] }, DATE, "morning"),
+      "おはようございます。今日は不燃ごみの日です（8:00まで）",
+    );
+    assert.equal(
+      reminderMessage({ ok: true, source: "fake", address: ADDRESS, types: ["不燃ごみ"] }, DATE, "morning"),
+      "おはようございます。今日は不燃ごみの日です（10/2 金）",
+    );
   });
 
   it("収集がない日は送らない", () => {

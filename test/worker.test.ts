@@ -69,8 +69,8 @@ describe("Cron の LINE 通知", () => {
     assert.equal(body.to, "U123");
     assert.equal(body.messages.length, 1);
     assert.equal(body.messages[0].type, "flex");
-    assert.equal(body.messages[0].altText, "明日 10/7（水）は可燃ごみの日です");
-    assert.match(JSON.stringify(body.messages[0].contents), /明日のごみ/);
+    assert.equal(body.messages[0].altText, "明日は可燃ごみの日です（10/7 水）");
+    assert.match(JSON.stringify(body.messages[0].contents), /あしたのごみ/);
   });
 
   it("7時（日本時間）に、当日の種別を朝のカードで送る", async () => {
@@ -78,8 +78,8 @@ describe("Cron の LINE 通知", () => {
     await notifyScheduled(ENV, new Date("2026-10-06T22:00:00Z"), fetchFn);
     assert.equal(sent.length, 1);
     const message = JSON.parse(sent[0].init.body as string).messages[0];
-    assert.equal(message.altText, "今日 10/7（水）は可燃ごみの日です");
-    assert.match(JSON.stringify(message.contents), /今日のごみ/);
+    assert.equal(message.altText, "おはようございます。今日は可燃ごみの日です（8:00まで）");
+    assert.match(JSON.stringify(message.contents), /きょうのごみ/);
   });
 
   it("住所が見つからないなどのときは、テキストで送る", async () => {
@@ -131,7 +131,7 @@ describe("POST /notify（テスト送信）", () => {
   it("date を省略すると翌日分を、目印を付けて送る", async () => {
     const { fetchFn, texts } = fakeFetch();
     const res = await handleNotify(ENV, url(), NOW, fetchFn);
-    const text = "【テスト送信】明日 10/7（水）は可燃ごみの日です";
+    const text = "【テスト送信】明日は可燃ごみの日です（10/7 水）";
     assert.deepEqual(res, { status: 200, body: { date: "2026-10-07", slot: "evening", sent: true, text } });
     assert.deepEqual(texts, [text]);
   });
@@ -146,7 +146,7 @@ describe("POST /notify（テスト送信）", () => {
   it("午前に送ると、当日分を朝のカードで送る", async () => {
     const { fetchFn, texts } = fakeFetch();
     const res = await handleNotify(ENV, url(), new Date("2026-10-06T22:00:00Z"), fetchFn);
-    const text = "【テスト送信】今日 10/7（水）は可燃ごみの日です";
+    const text = "【テスト送信】おはようございます。今日は可燃ごみの日です（8:00まで）";
     assert.deepEqual(res, { status: 200, body: { date: "2026-10-07", slot: "morning", sent: true, text } });
     assert.deepEqual(texts, [text]);
   });
@@ -155,7 +155,7 @@ describe("POST /notify（テスト送信）", () => {
     const { fetchFn, texts } = fakeFetch();
     const res = await handleNotify(ENV, url("?slot=morning&date=2026-10-07"), NOW, fetchFn);
     assert.equal((res.body as { slot: string }).slot, "morning");
-    assert.deepEqual(texts, ["【テスト送信】今日 10/7（水）は可燃ごみの日です"]);
+    assert.deepEqual(texts, ["【テスト送信】おはようございます。今日は可燃ごみの日です（8:00まで）"]);
   });
 
   it("slot が morning / evening 以外なら 400", async () => {
