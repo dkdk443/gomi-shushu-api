@@ -67,6 +67,32 @@ describe("reminderFlex", () => {
     assert.match(morning, /images\/hero-morning\.png/);
   });
 
+  it("「出し方を見る」で、1種類ならその種別の、2種類以上なら総合の出し方のページを開く", () => {
+    const button = (types: string[]) =>
+      (reminderFlex(d("2026-10-08"), types, "suginami-2026", "x").contents as {
+        footer: { contents: { action: { type: string; label: string; uri: string } }[] };
+      }).footer.contents[0].action;
+    assert.deepEqual(button(["可燃ごみ"]), {
+      type: "uri",
+      label: "出し方を見る",
+      uri: "https://www.city.suginami.tokyo.jp/s104/716.html",
+    });
+    assert.equal(button(["不燃ごみ", "古紙・ペットボトル"]).uri, "https://www.city.suginami.tokyo.jp/s104/713.html");
+  });
+
+  it("2種類以上の日は、種別の行をタップしてもその種別の出し方を開く", () => {
+    const json = JSON.stringify(reminderFlex(d("2026-10-09"), ["不燃ごみ", "古紙・ペットボトル"], "suginami-2026", "x").contents);
+    assert.ok(json.includes('{"type":"uri","label":"不燃ごみの出し方","uri":"https://www.city.suginami.tokyo.jp/s104/717.html"}'));
+    // 品目ごとにページが分かれている種別は総合ページ
+    assert.ok(json.includes('{"type":"uri","label":"古紙・ペットボトルの出し方","uri":"https://www.city.suginami.tokyo.jp/s104/713.html"}'));
+  });
+
+  it("出し方のページを知らないソースでは、ボタンもタップも付けない", () => {
+    const json = JSON.stringify(reminderFlex(d("2026-10-09"), ["不燃ごみ", "古紙・ペットボトル"], "other-2026", "x").contents);
+    assert.ok(!json.includes('"footer"'));
+    assert.ok(!json.includes('"uri"'));
+  });
+
   it("画像のURLがなければ、上部の画像を付けず絵文字を使う", () => {
     const flex = reminderFlex(d("2026-10-03"), ["可燃ごみ"], "suginami-2026", "x");
     assert.ok(!JSON.stringify(flex.contents).includes('"hero"'));

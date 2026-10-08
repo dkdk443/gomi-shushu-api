@@ -3,6 +3,7 @@
 import { weekdayOf } from "../domain/date.ts";
 import type { PlainDate } from "../domain/types.ts";
 import { deadlineOf } from "./deadline.ts";
+import { guideUrl } from "./guide.ts";
 import type { TimeSlot } from "./slot.ts";
 
 interface TypeStyle {
@@ -73,6 +74,11 @@ function note(slot: TimeSlot, deadline: string | undefined, count: number): stri
   return until + tip || undefined;
 }
 
+// タップで区の出し方のページを開く。ページを知らなければ付けない
+function guideAction(url: string | undefined, label: string) {
+  return url ? { action: { type: "uri", label, uri: url } } : {};
+}
+
 // 1種類の日: 大きなアイコンと種別名、その下に日付
 function singleType(heading: string, type: string, dateText: string, imageBaseUrl: string | undefined) {
   const style = STYLES[type] ?? DEFAULT_STYLE;
@@ -109,8 +115,14 @@ function singleType(heading: string, type: string, dateText: string, imageBaseUr
   ];
 }
 
-// 2種類以上の日: 見出しの右に日付、種別ごとに色の付いた行
-function multipleTypes(heading: string, types: readonly string[], dateText: string, imageBaseUrl: string | undefined) {
+// 2種類以上の日: 見出しの右に日付、種別ごとに色の付いた行。行をタップすると、その種別の出し方のページを開く
+function multipleTypes(
+  heading: string,
+  types: readonly string[],
+  dateText: string,
+  imageBaseUrl: string | undefined,
+  source: string,
+) {
   return [
     {
       type: "box",
@@ -130,6 +142,7 @@ function multipleTypes(heading: string, types: readonly string[], dateText: stri
         paddingAll: "lg",
         spacing: "lg",
         alignItems: "center",
+        ...guideAction(guideUrl(source, type), `${type}の出し方`),
         contents: [
           { type: "box", layout: "vertical", width: "56px", flex: 0, contents: [icon(style, imageBaseUrl, "56px")] },
           { type: "text", text: type, size: "lg", weight: "bold", color: TEXT_COLOR, wrap: true },
@@ -151,6 +164,8 @@ export function reminderFlex(
   const dateText = `${m}月${d}日（${WEEKDAYS[weekdayOf(date)]}）`;
   const { heading, hero } = SLOT_STYLES[slot];
   const noteText = note(slot, deadlineOf(source), types.length);
+  // 1種類ならその種別の、2種類以上なら総合の出し方のページ
+  const guide = guideUrl(source, types.length === 1 ? types[0] : undefined);
 
   return {
     type: "flex",
@@ -176,10 +191,25 @@ export function reminderFlex(
           ...(label ? [{ type: "text", text: label, size: "xs", weight: "bold", color: LABEL_COLOR }] : []),
           ...(types.length === 1
             ? singleType(heading, types[0], dateText, imageBaseUrl)
-            : multipleTypes(heading, types, dateText, imageBaseUrl)),
+            : multipleTypes(heading, types, dateText, imageBaseUrl, source)),
           ...(noteText ? [{ type: "text", text: noteText, size: "md", color: TEXT_COLOR, wrap: true }] : []),
         ],
       },
+      ...(guide && {
+        footer: {
+          type: "box",
+          layout: "vertical",
+          paddingTop: "none",
+          contents: [
+            {
+              type: "button",
+              style: "secondary",
+              height: "sm",
+              action: { type: "uri", label: "出し方を見る", uri: guide },
+            },
+          ],
+        },
+      }),
     },
   };
 }
